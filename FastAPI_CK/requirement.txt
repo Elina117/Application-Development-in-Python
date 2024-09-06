@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+loguru
+requests
+psycopg2
