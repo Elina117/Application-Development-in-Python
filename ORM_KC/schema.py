@@ -24,7 +24,9 @@ class PostGet(BaseModel):
 
 class FeedGet(BaseModel):
     user_id: int
+    user: UserGet
     post_id: int
+    post: PostGet
     action: str
     time: datetime.datetime
 
