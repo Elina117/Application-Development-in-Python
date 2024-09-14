@@ -7,10 +7,9 @@ from table_post import Post
 from table_feed import Feed
 
 from database import SessionLocal
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
-from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -47,3 +46,19 @@ def get_action_post(id:int, limit: int = 10, db: Session = Depends(get_db)):
     if not result:
         raise HTTPException(200, [])
     return result
+
+@app.get("/post/recommendations/", response_model=List[PostGet])
+def get_top_liked_posts(limit: int=10, db: Session = Depends(get_db)):
+    result = (
+        db.query(Post)
+        .select_from(Feed)
+        .filter(Feed.action == "like")
+        .join(Post)
+        .group_by(Post.id)
+        .order_by(desc(func.count(Feed.post_id)))
+        .limit(limit)
+        .all()
+    )
+
+    res_list = [PostGet(id=post.id, text=post.text, topic=post.topic) for post in result]
+    return res_list
